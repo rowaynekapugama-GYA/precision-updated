@@ -62,7 +62,7 @@
   /* Revision 1: hold the sticky Call and Book bar back while the hero is on
      screen, so Book Online is never offered twice at once on a phone. With no
      IntersectionObserver the bar just stays visible, as it did before. */
-  var heroSection=document.querySelector('.hero');
+  var heroSection=document.querySelector('.hero, .page-hero');
   if(heroSection&&'IntersectionObserver' in window){
     document.body.classList.add('hero-onscreen');
     new IntersectionObserver(function(es){
@@ -92,5 +92,90 @@
       })
       .catch(function(){s.className='form-status err';s.textContent='Sorry, that did not send. Please call us on (07) 3852 1160.';})
       .then(function(){btn.disabled=false;});
+  });
+})();
+
+/* smile gallery: treatment filters and the before/after lightbox */
+(function(){
+  var grid=document.querySelector('.gallery-grid'); if(!grid)return;
+  var cards=[].slice.call(grid.querySelectorAll('.gallery-card'));
+  var chips=[].slice.call(document.querySelectorAll('.filter-chip'));
+  var count=document.querySelector('.gallery-count');
+
+  function apply(name){
+    var shown=0;
+    cards.forEach(function(c){
+      var on = name==='All' || c.getAttribute('data-cat')===name;
+      c.hidden=!on; if(on) shown++;
+    });
+    chips.forEach(function(b){
+      var on=b.getAttribute('data-filter')===name;
+      b.classList.toggle('is-on',on);
+      b.setAttribute('aria-pressed',on?'true':'false');
+    });
+    if(count){
+      count.textContent = name==='All'
+        ? 'Showing all '+shown+' cases'
+        : 'Showing '+shown+' '+name+(shown===1?' case':' cases');
+    }
+  }
+  chips.forEach(function(b){
+    b.addEventListener('click',function(){apply(b.getAttribute('data-filter'));});
+  });
+
+  /* lightbox */
+  var lb=document.getElementById('lightbox');
+  if(!lb)return;
+  var img=document.getElementById('lbImg'), who=document.getElementById('lbWho'),
+      meta=document.getElementById('lbMeta'), last=null, i=-1;
+
+  function visible(){ return cards.filter(function(c){return !c.hidden;}); }
+
+  function show(card){
+    var b=card.querySelector('.ph'), thumb=b.querySelector('img');
+    img.src=thumb.getAttribute('src').replace(/-th\.webp$/,'.webp');
+    img.alt=thumb.getAttribute('alt');
+    var cap=card.querySelector('figcaption');
+    who.textContent=cap.querySelector('strong').textContent;
+    var tt=cap.querySelector('.tt'), tf=cap.querySelector('.tf');
+    meta.textContent=tt.textContent+(tf?'  |  '+tf.textContent:'');
+    i=visible().indexOf(card);
+  }
+
+  function open(card){
+    last=document.activeElement;
+    show(card);
+    lb.hidden=false; document.body.classList.add('lb-open');
+    lb.querySelector('.lb-x').focus();
+  }
+  function close(){
+    lb.hidden=true; document.body.classList.remove('lb-open'); img.removeAttribute('src');
+    if(last&&last.focus)last.focus();
+  }
+  function step(d){
+    var v=visible(); if(!v.length)return;
+    i=(i+d+v.length)%v.length; show(v[i]);
+  }
+
+  grid.addEventListener('click',function(e){
+    var b=e.target.closest('.ph'); if(b) open(b.closest('.gallery-card'));
+  });
+  lb.addEventListener('click',function(e){
+    if(e.target.closest('[data-close]')) close();
+    var n=e.target.closest('[data-step]'); if(n) step(+n.getAttribute('data-step'));
+  });
+  document.addEventListener('keydown',function(e){
+    if(lb.hidden)return;
+    if(e.key==='Escape')close();
+    else if(e.key==='ArrowLeft')step(-1);
+    else if(e.key==='ArrowRight')step(1);
+    else if(e.key==='Tab'){
+      /* keep focus inside the dialog while it is open */
+      var f=[].slice.call(lb.querySelectorAll('button')).filter(function(el){return el.offsetParent!==null;});
+      if(!f.length)return;
+      var first=f[0], lastEl=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();lastEl.focus();}
+      else if(!e.shiftKey&&document.activeElement===lastEl){e.preventDefault();first.focus();}
+    }
   });
 })();
