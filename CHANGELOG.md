@@ -1,5 +1,141 @@
 # Changelog
 
+## 2026-09-30 - Caching headers fixed
+
+`vercel.json` was telling browsers to cache everything under `/assets/` for a year
+with `immutable`, which means "never check again". That is only safe when file names
+change on every build, and ours do not: `styles.css` keeps its name forever. So a
+visitor who loaded the site once could be served an old stylesheet for a year, with
+no way to get the new one short of a hard reload.
+
+Now: CSS and JS revalidate on every request, images cache for a day and revalidate.
+Slightly more requests, but the site can never go stale on someone.
+
+Also `ul{list-style:none}` did not cover `ol`, so the breadcrumb relied on its flex
+layout to suppress the numbers. It is `ul,ol` now, and `.prose ol li` still restores
+decimals where the copy uses a numbered list.
+
+## 2026-09-30 - Meet the Team restyled
+
+Rebuilt in the shape of the reference the client sent, using the site's own tokens
+rather than the template's. No new colour, radius or font.
+
+- **Six cards, two rows of three.** Dr Choi is now the first card in the same grid
+  rather than a wide feature card above it, so every card is the same shape.
+- Square photograph on a soft tint, then role, name and bio beneath it.
+- Role sits above the name in small uppercase blue. It is below the name in the
+  markup and lifted by CSS order, so a screen reader still reads the heading first.
+- Circular arrow link, pinned to the bottom of the card so cards with a link stay
+  level with those without.
+- **Only Dr Choi has a link**, because his is the only profile page. Five "learn
+  more" links to nowhere would be worse than none. If the practice wants one on
+  every card, each person needs a page or an expandable bio.
+- **Everything is centred except the bio.** The reference has bios of about 25
+  words; these run to 60, and centred text that long is measurably harder to read.
+  Role and name centred, bio left aligned.
+- Portraits recut to 1:1 from the top of the frame, trimmed slightly at the sides so
+  the subject is not lost in the room.
+
+## 2026-09-30 - Team portraits
+
+All five staff now have a photograph on Meet the Team, alongside Dr Choi's feature
+card. They were shot in reception against the same wall, so the grid reads as a set.
+
+- Lizzy, Oral Health Therapist
+- Lidia, Patient Coordinator
+- Chrizza, Clinical Coordinator
+- Haruna, Dental Assistant
+- Sheila, Dental Assistant
+
+Each is cut to 4:5 from the top of the frame, because these are standing three
+quarter shots and a centre crop takes the head off. Alt text carries the name and
+role. This closes the open item about photographs of non-dentist staff: the client
+supplying them is the approval the developer instructions require.
+
+**Who is who was confirmed with the client, not guessed.** The file names did not
+survive the upload and only Sheila could be read off a photograph, from her name
+badge. The obvious inference from the uniforms, that the two in plain scrubs were
+the two dental assistants, turned out to be wrong on both counts.
+
+## 2026-09-30 - Menu thumbnails rebuilt, plus 16 more service photographs
+
+### The repeating icons are gone
+The mega menu thumbnails were Phase 1 stock, and 28 distinct images were stretched
+across 35 menu items, so seven groups repeated. One photo of a woman in a chair ran
+under Preventive Care for Young Adults, Anxious Patients, Teeth Whitening and the
+Smile Gallery at the same time. Another, a screen showing a pink scan, ran under Gum
+Treatment, White Tooth Fillings, CEREC, Dental Abscess and Articles. Crowns matched
+Mouthguards, Tooth Extraction matched Soft Tissue Injuries, Invisalign matched
+SmileView, Grinding matched Knocked-Out Tooth, Root Canal matched Lost Crown, and
+Children's Dentistry matched Children's Dental Emergencies.
+
+Every thumbnail is now a different photograph, and all but two are the practice's own
+rather than stock. Each is matched to what the page is actually about: the whitening
+lamp on Teeth Whitening, the intra-oral scanner on CEREC, the OPG machine on Dental
+Abscess, the clinical photography setup on Composite Resin Veneers, sedation on Tooth
+Extraction, the before and after screen on Smile Gallery.
+
+**Two are unchanged and still need a real photograph.** Children's Dentistry and
+Dentures. Nothing supplied shows a child, and the denture model is the only denture
+image there is. Children's Dental Emergencies now carries a different photo so it no
+longer matches Children's Dentistry, but it is a general practice shot rather than a
+children's emergency one.
+
+### 16 more photographs placed
+- **Contact**, "Getting Here and Parking": the building exterior with the Precision
+  Dental signage above Cafe Etto, which is what someone reading that section needs.
+- **About Us**, "Visit Us": the front desk.
+- **Accreditation**: a treatment room.
+- **Tooth Extraction**: treatment in progress.
+- The rest go into the menu thumbnails above.
+
+### Counts
+37 distinct photographs across the pages, 35 across the menu. The heaviest-used page
+image is down to 6 pages. 52 MB of JPEG became 1.1 MB of WebP.
+
+## 2026-09-30 - Service photography, 16 images
+
+The practice supplied 16 photographs from a shoot covering the treatment rooms,
+equipment and treatment in progress. Every one is placed, each on a single page.
+
+### Page heroes
+- **Category pages**: General Dentistry gets the intra-oral camera examination,
+  Cosmetic Dentistry a patient looking at her smile in the mirror, Restorative
+  Dentistry treatment in progress. Emergency Dentistry keeps its existing photograph.
+- **Treatment pages the shoot covers directly**: Invisalign gets the study models
+  comparing fixed braces with clear aligners, Dental Implants the implant fixture in
+  a model, Porcelain Veneers the front-teeth work, Check-Up and Clean the x-ray review
+  on screen, Wisdom Teeth the x-ray being taken, Anxious Patients the consultation
+  shot with no instruments in frame, Preventive Care for Adults the treatment room.
+- **Invisalign SmileView** now carries the aligners on a study model.
+- Two of the sixteen are not service pages but are clearly where they belong:
+  **Dental Technology** gets the OPG and panoramic x-ray room, and **Infection
+  Prevention and Control** the prepared treatment room with the lead-lined door.
+
+### The three upright photographs
+A tall frame in a 4:3 page hero loses its top and bottom, which on these would have
+cut off either the screen or the clinician. They sit beside body copy instead, in the
+portrait media-split, against the "Is this right for you?" section where a patient is
+deciding: the scale and clean on Check-Up and Clean, the x-ray discussion on Gum and
+Periodontal Treatment, and Dr Choi working with loupes on Root Canal Therapy.
+
+### Repetition
+Thirteen more pages now carry their own photograph instead of a rotated one. The
+heaviest-used image is down to 7 pages from 8, and 16 photographs are used exactly
+once each. 56 MB of JPEG became 774 KB of WebP.
+
+### Fixed while in there
+- **Trade mark symbols were printing as raw entity text.** The mega menu writes
+  `Invisalign<sup>&reg;</sup>`. Stripping the tags left the literal string `&reg;`,
+  which then had its ampersand escaped, so the Invisalign breadcrumb read
+  "Invisalign&reg;" and four related-service cards and the sitemap read the same. The
+  menu label is now unescaped after the tags come off, so it prints Invisalign(R) and
+  Invisalign SmileView(TM) properly. A new `plain()` helper does this in one place.
+- **Smile gallery tiles are now square.** The supplied before and after photographs
+  are all 1:1, before stacked over after. The tile was 3:2, so each one sat letterboxed
+  with pale bars either side, and the enlarged view did the same. Tiles are 1:1 and the
+  enlarged panel now sizes itself to the photograph.
+
 ## 2026-09-30 - Smile gallery built from the current site
 
 The gallery was a consent placeholder. It now carries all 87 before and after cases
